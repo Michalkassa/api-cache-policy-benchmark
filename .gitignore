@@ -1,0 +1,25 @@
+# Java / build
+app/target/
+app/build/
+app/.gradle/
+*.class
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+
+# Benchmark output (raw runs are large; keep processed summaries)
+results/raw/*
+!results/raw/.gitkeep
+
+# Env
+.env

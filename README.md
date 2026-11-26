@@ -154,3 +154,33 @@ Every config gets one capacity search and one measurement run (3 repeats).
 ## Stack
 
 Java 21, Spring Boot, Redis, PostgreSQL 16, Nginx, Docker Compose, k6, Prometheus, Grafana, Python
+
+## Project layout
+
+```
+app/                         Spring Boot Twitter clone
+  src/main/java/com/apicachebenchmark/
+    tweet/ timeline/ like/ user/   Endpoints, services, repositories per feature
+    cache/                         Cache policies: write policies, block keys, sharding
+    config/                        Spring, Redis and cache configuration
+  src/main/resources/db/migration/ Database schema migrations
+  src/test/java/                   Unit and integration tests
+infra/                       Docker Compose services
+  nginx/                         Load balancer config for the 2 app instances
+  redis/standalone/ redis/cluster/  Redis configs (replacement policy, 1 vs N shards)
+  postgres/seed/                 1M-tweet seed data (fixed seed)
+  prometheus/ grafana/           Metrics scraping and dashboards
+loadtest/                    k6 simulated users
+  scenarios/                     User journey, capacity search, crash test
+  lib/                           Shared helpers (think times, random choices)
+experiments/
+  configs/                       One config per run in the run list
+  scripts/                       Run orchestration: reset, capacity search, measurement
+analysis/                    Python: average access time, verdicts, charts
+  src/ notebooks/
+results/
+  raw/                           k6 and Prometheus output (git-ignored)
+  processed/                     Summary tables per run
+  figures/                       Charts for each RQ
+docs/                        Methodology notes and write-up
+```
