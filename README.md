@@ -2,7 +2,7 @@
 
 **Which CPU-cache design choices make Redis the most efficient cache for a backend API, and why?**
 
-A Twitter clone is cached with Redis and load-tested, changing one design choice at a time.
+Two apps are cached with Redis and load-tested, changing one design choice at a time: a read/write-heavy Twitter clone and a CPU-heavy document stats service.
 
 ## Research questions
 
@@ -75,6 +75,15 @@ One is changed per run. The others stay at the baseline.
 | `POST /tweets/{id}/like` | Likes a tweet |
 
 A Twitter clone suits caching tests: a few viral tweets get most of the traffic, likes constantly update popular tweets, and the data is far bigger than the cache.
+
+## App: Document stats
+
+| Endpoint | What it does |
+|---|---|
+| `GET /documents/{id}/stats` | Computes a document's word count, top words and readability score |
+| `PUT /documents/{id}` | Edits a document's text |
+
+Document stats are the CPU-heavy contrast to the Twitter clone: the database only returns the text, so a miss costs computing the stats rather than a query, and miss penalty dominates average access time. Longer documents cost more to analyse, and a few popular documents get most of the traffic.
 
 ## Simulated users (k6)
 
@@ -158,13 +167,20 @@ Java 21, Spring Boot, Redis, PostgreSQL 16, Nginx, Docker Compose, k6, Prometheu
 ## Project layout
 
 ```
-app/                         Spring Boot Twitter clone
-  src/main/java/com/apicachebenchmark/
-    tweet/ timeline/ like/ user/   Endpoints, services, repositories per feature
-    cache/                         Cache policies: write policies, block keys, sharding
-    config/                        Spring, Redis and cache configuration
-  src/main/resources/db/migration/ Database schema migrations
-  src/test/java/                   Unit and integration tests
+apps/
+  twitter/                   Spring Boot Twitter clone (read/write-heavy)
+    src/main/java/com/apicachebenchmark/
+      tweet/ timeline/ like/ user/   Endpoints, services, repositories per feature
+      cache/                         Cache policies: write policies, block keys, sharding
+      config/                        Spring, Redis and cache configuration
+    src/main/resources/db/migration/ Database schema migrations
+    src/test/java/                   Unit and integration tests
+  documents/                 Spring Boot document stats service (CPU-heavy)
+    src/main/java/com/apicachebenchmark/
+      document/ stats/               Endpoints, repository, stats computation
+      cache/ config/                 Same roles as in twitter/
+    src/main/resources/db/migration/ Database schema migrations
+    src/test/java/                   Unit and integration tests
 infra/                       Docker Compose services
   nginx/                         Load balancer config for the 2 app instances
   redis/standalone/ redis/cluster/  Redis configs (replacement policy, 1 vs N shards)

@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: twitter
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5442/twitter}
+    username: ${DB_USER:twitter}
+    password: ${DB_PASSWORD:twitter}

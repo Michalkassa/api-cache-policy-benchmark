@@ -1,7 +1,7 @@
 # Java / build
-app/target/
-app/build/
-app/.gradle/
+apps/*/target/
+apps/*/build/
+apps/*/.gradle/
 *.class
 *.log
 
