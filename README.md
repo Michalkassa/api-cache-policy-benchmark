@@ -2,7 +2,7 @@
 
 **Which CPU-cache design choices make Redis the most efficient cache for a backend API, and why?**
 
-Two apps are cached with Redis and load-tested, changing one design choice at a time: a read/write-heavy Twitter clone and a CPU-heavy Monte Carlo option pricer.
+Two apps are cached with Redis and load-tested, changing one design choice at a time: a read/write-heavy Twitter clone and a CPU-heavy document stats service.
 
 ## Research questions
 
@@ -76,14 +76,14 @@ One is changed per run. The others stay at the baseline.
 
 A Twitter clone suits caching tests: a few viral tweets get most of the traffic, likes constantly update popular tweets, and the data is far bigger than the cache.
 
-## App: Monte Carlo option pricer
+## App: Document stats
 
 | Endpoint | What it does |
 |---|---|
-| `GET /options/{id}/price` | Prices an option by simulating random price paths of its asset |
-| `POST /assets/{id}/price` | Updates an asset's market price, changing the inputs of all its options |
+| `GET /documents/{id}/stats` | Computes a document's word count, top words and readability score |
+| `PUT /documents/{id}` | Edits a document's text |
 
-A Monte Carlo pricer is the CPU-heavy contrast to the Twitter clone: the database holds only small inputs, so a miss costs a simulation rather than a query, and miss penalty dominates average access time. Path-dependent options (Asian, barrier) cost more to simulate than European ones, and a few popular contracts get most of the traffic.
+Document stats are the CPU-heavy contrast to the Twitter clone: the database only returns the text, so a miss costs computing the stats rather than a query, and miss penalty dominates average access time. Longer documents cost more to analyse, and a few popular documents get most of the traffic.
 
 ## Simulated users (k6)
 
@@ -175,9 +175,9 @@ apps/
       config/                        Spring, Redis and cache configuration
     src/main/resources/db/migration/ Database schema migrations
     src/test/java/                   Unit and integration tests
-  montecarlo/                Spring Boot Monte Carlo option pricer (CPU-heavy)
+  documents/                 Spring Boot document stats service (CPU-heavy)
     src/main/java/com/apicachebenchmark/
-      option/ asset/ simulation/     Endpoints, services, simulation engine
+      document/ stats/               Endpoints, repository, stats computation
       cache/ config/                 Same roles as in twitter/
     src/main/resources/db/migration/ Database schema migrations
     src/test/java/                   Unit and integration tests

@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: documents
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/documents}
+    username: ${DB_USER:documents}
+    password: ${DB_PASSWORD:documents}
