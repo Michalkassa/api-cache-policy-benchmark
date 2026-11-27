@@ -1,0 +1,46 @@
+# Databases for the two apps. Each app has its own PostgreSQL, pinned to the
+# same version so results are comparable across runs.
+#
+#   docker compose -f infra/docker-compose.yml up -d
+#   docker compose -f infra/docker-compose.yml down -v   # reset before a run
+#
+# Host ports avoid 5432 so they don't clash with a local PostgreSQL.
+
+name: api-cache-benchmark
+
+services:
+  twitter-db:
+    image: postgres:16.15
+    environment:
+      POSTGRES_DB: twitter
+      POSTGRES_USER: twitter
+      POSTGRES_PASSWORD: twitter
+    ports:
+      - "5442:5432"
+    volumes:
+      - twitter-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U twitter -d twitter"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+  documents-db:
+    image: postgres:16.15
+    environment:
+      POSTGRES_DB: documents
+      POSTGRES_USER: documents
+      POSTGRES_PASSWORD: documents
+    ports:
+      - "5443:5432"
+    volumes:
+      - documents-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U documents -d documents"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  twitter-db:
+  documents-db:
